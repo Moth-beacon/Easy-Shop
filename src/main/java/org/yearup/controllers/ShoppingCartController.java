@@ -17,7 +17,7 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/cart")
 @CrossOrigin
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("isAuthenticated()") // Only logged-in users can use these endpoints
 public class ShoppingCartController
 {
     private final ShoppingCartDao shoppingCartDao;
@@ -32,6 +32,8 @@ public class ShoppingCartController
         this.productDao = productDao;
     }
 
+    // GET /cart
+    // Returns the current user's shopping cart
     @GetMapping
     public ShoppingCart getCart(Principal principal)
     {
@@ -39,9 +41,7 @@ public class ShoppingCartController
         {
             String userName = principal.getName();
             User user = userDao.getByUserName(userName);
-            int userId = user.getId();
-
-            return shoppingCartDao.getByUserId(userId);
+            return shoppingCartDao.getByUserId(user.getId());
         }
         catch (Exception e)
         {
@@ -49,6 +49,8 @@ public class ShoppingCartController
         }
     }
 
+    // POST /cart/products/{productId}
+    // Adds a product to the cart (or increases quantity if it’s already there)
     @PostMapping("/products/{productId}")
     public ShoppingCart addToCart(@PathVariable int productId, Principal principal)
     {
@@ -56,10 +58,8 @@ public class ShoppingCartController
         {
             String userName = principal.getName();
             User user = userDao.getByUserName(userName);
-            int userId = user.getId();
-
-            shoppingCartDao.addProduct(userId, productId);
-            return shoppingCartDao.getByUserId(userId);
+            shoppingCartDao.addProduct(user.getId(), productId);
+            return shoppingCartDao.getByUserId(user.getId());
         }
         catch (Exception e)
         {
@@ -67,6 +67,8 @@ public class ShoppingCartController
         }
     }
 
+    // PUT /cart/products/{productId}
+    // Updates the quantity of a specific item in the cart
     @PutMapping("/products/{productId}")
     public ShoppingCart updateCartItem(@PathVariable int productId,
                                        @RequestBody ShoppingCartItem item,
@@ -76,10 +78,8 @@ public class ShoppingCartController
         {
             String userName = principal.getName();
             User user = userDao.getByUserName(userName);
-            int userId = user.getId();
-
-            shoppingCartDao.update(userId, productId, item.getQuantity());
-            return shoppingCartDao.getByUserId(userId);
+            shoppingCartDao.update(user.getId(), productId, item.getQuantity());
+            return shoppingCartDao.getByUserId(user.getId());
         }
         catch (Exception e)
         {
@@ -87,6 +87,8 @@ public class ShoppingCartController
         }
     }
 
+    // DELETE /cart
+    // Removes all items from the cart
     @DeleteMapping
     public ShoppingCart clearCart(Principal principal)
     {
@@ -94,10 +96,8 @@ public class ShoppingCartController
         {
             String userName = principal.getName();
             User user = userDao.getByUserName(userName);
-            int userId = user.getId();
-
-            shoppingCartDao.clear(userId);
-            return shoppingCartDao.getByUserId(userId);
+            shoppingCartDao.clear(user.getId());
+            return shoppingCartDao.getByUserId(user.getId());
         }
         catch (Exception e)
         {
