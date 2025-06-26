@@ -1,14 +1,25 @@
-package org.yearup.data;
+package org.yearup.data.mysql;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.yearup.data.ShoppingCartDao;
+import org.yearup.models.Product;
 import org.yearup.models.ShoppingCart;
+import org.yearup.models.ShoppingCartItem;
 
-public interface ShoppingCartDao
+import java.util.List;
+
+@Component
+public class MySqlShoppingCartDao implements ShoppingCartDao
 {
-    ShoppingCart getByUserId(int userId);
+    private final JdbcTemplate jdbcTemplate;
 
-    void addProduct(int userId, int productId);
+    @Autowired
+    public MySqlShoppingCartDao(JdbcTemplate jdbcTemplate)
+    {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
-    void update(int userId, int productId, int quantity);
-
-    void clear(int userId);
+    // methods to be implemented: getByUserId, addProduct, update, clear
 }
