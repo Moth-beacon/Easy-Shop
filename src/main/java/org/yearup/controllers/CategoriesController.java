@@ -40,7 +40,7 @@ public class CategoriesController
     @GetMapping("/{categoryId}/products")
     public List<Product> getProductsById(@PathVariable int categoryId)
     {
-        return productDao.getByCategoryId(categoryId);
+        return productDao.listByCategoryId(categoryId); // ✅ Correct method name
     }
 
     @PostMapping
