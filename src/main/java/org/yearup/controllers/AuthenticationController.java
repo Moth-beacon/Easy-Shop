@@ -1,55 +1,40 @@
 package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.yearup.data.UserDao;
 import org.yearup.models.User;
+import org.yearup.models.authentication.LoginDto;
 import org.yearup.models.authentication.RegisterUserDto;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/auth")
 @CrossOrigin
-public class AuthenticationController
-{
+public class AuthenticationController {
+
     private final UserDao userDao;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthenticationController(UserDao userDao, PasswordEncoder passwordEncoder)
-    {
+    public AuthenticationController(UserDao userDao) {
         this.userDao = userDao;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/register")
-    public void registerUser(@RequestBody RegisterUserDto dto)
-    {
-        try
-        {
-            if (!dto.getPassword().equals(dto.getConfirmPassword()))
-            {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords do not match");
-            }
+    public void register(@RequestBody RegisterUserDto dto) {
+        User newUser = new User();
+        newUser.setUsername(dto.getUsername());
+        newUser.setPassword(dto.getPassword()); // Password should be hashed in real scenarios
+        newUser.setAuthorities(dto.getRole());
 
-            if (userDao.exists(dto.getUsername()))
-            {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists");
-            }
+        userDao.create(newUser);
+    }
 
-            String hashedPassword = passwordEncoder.encode(dto.getPassword());
-            User newUser = new User();
-            newUser.setUsername(dto.getUsername());
-            newUser.setPassword(hashedPassword);
-            newUser.addRole(dto.getRole());
-
-            userDao.create(newUser);
+    @PostMapping("/login")
+    public User login(@RequestBody LoginDto dto) {
+        User user = userDao.getByUserName(dto.getUsername());
+        if (user != null && user.getPassword().equals(dto.getPassword())) {
+            return user;
         }
-        catch (Exception e)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Registration failed");
-        }
+        throw new RuntimeException("Invalid login credentials");
     }
 }
