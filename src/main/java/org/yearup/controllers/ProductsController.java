@@ -45,19 +45,22 @@ public class ProductsController
     @PreAuthorize("permitAll()")
     public Product getById(@PathVariable int id)
     {
+        Product product = null;
         try
         {
-            Product product = productDao.getById(id);
-
-            if (product == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-            return product;
+            product = productDao.getById(id);
         }
         catch (Exception ex)
         {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
         }
+
+        if (product == null)
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        return product;
     }
 
     @PostMapping()
@@ -80,7 +83,7 @@ public class ProductsController
     {
         try
         {
-            productDao.update(id, product); // ✅ FIXED
+            productDao.update(id, product);
         }
         catch (Exception ex)
         {
