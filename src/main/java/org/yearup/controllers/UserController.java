@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.*;
 import org.yearup.data.UserDao;
 import org.yearup.models.User;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/users")
 @CrossOrigin
@@ -18,15 +20,15 @@ public class UserController
         this.userDao = userDao;
     }
 
-    @PostMapping
-    public User addUser(@RequestBody User user)
+    @GetMapping
+    public List<User> getAll()
     {
-        return userDao.create(user);
+        return userDao.getAll();
     }
 
-    @GetMapping("/{userName}")
-    public User getByUserName(@PathVariable String userName)
+    @GetMapping("/{id}")
+    public User getById(@PathVariable int id)
     {
-        return userDao.getByUserName(userName);
+        return userDao.getUserById(id);
     }
 }
