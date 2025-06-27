@@ -2,7 +2,6 @@ package org.yearup.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.yearup.models.authentication.Authority;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -12,7 +11,7 @@ public class User {
 
    private int id;
    private String username;
-   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+   @JsonIgnore
    private String password;
    @JsonIgnore
    private boolean activated;

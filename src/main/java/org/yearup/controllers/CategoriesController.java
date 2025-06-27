@@ -1,8 +1,9 @@
 package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.yearup.data.CategoryDao;
 import org.yearup.data.ProductDao;
 import org.yearup.models.Category;
@@ -11,56 +12,43 @@ import org.yearup.models.Product;
 import java.util.List;
 
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("categories")
 @CrossOrigin
 public class CategoriesController
 {
-    private final CategoryDao categoryDao;
     private final ProductDao productDao;
+    private final CategoryDao categoryDao;
 
     @Autowired
-    public CategoriesController(CategoryDao categoryDao, ProductDao productDao)
+    public CategoriesController(ProductDao productDao, CategoryDao categoryDao)
     {
-        this.categoryDao = categoryDao;
         this.productDao = productDao;
+        this.categoryDao = categoryDao;
     }
 
-    @GetMapping
+    @GetMapping("")
     public List<Category> getAll()
     {
-        return categoryDao.getAllCategories();
+        try
+        {
+            return categoryDao.getAllCategories();
+        }
+        catch (Exception e)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get categories.");
+        }
     }
 
-    @GetMapping("/{id}")
-    public Category getById(@PathVariable int id)
+    @GetMapping("{categoryId}/products")
+    public List<Product> getByCategory(@PathVariable int categoryId)
     {
-        return categoryDao.getById(id);
-    }
-
-    @GetMapping("/{categoryId}/products")
-    public List<Product> getProductsById(@PathVariable int categoryId)
-    {
-        return productDao.listByCategoryId(categoryId); // ✅ Correct method name
-    }
-
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public Category addCategory(@RequestBody Category category)
-    {
-        return categoryDao.create(category);
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public void updateCategory(@PathVariable int id, @RequestBody Category category)
-    {
-        categoryDao.update(id, category);
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public void deleteCategory(@PathVariable int id)
-    {
-        categoryDao.delete(id);
+        try
+        {
+            return productDao.listByCategoryId(categoryId);
+        }
+        catch (Exception e)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get products.");
+        }
     }
 }

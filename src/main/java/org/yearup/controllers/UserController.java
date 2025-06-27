@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.yearup.data.UserDao;
 import org.yearup.models.User;
+import org.yearup.models.authentication.RegisterUserDto;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,11 +40,23 @@ public class UserController
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public User register(@RequestBody User user)
+    public User register(@RequestBody RegisterUserDto dto)
     {
         try
         {
-            return userDao.create(user);
+            // Check that passwords match
+            if (!dto.getPassword().equals(dto.getConfirmPassword()))
+            {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords do not match.");
+            }
+
+            // Create and register new user
+            User newUser = new User();
+            newUser.setUsername(dto.getUsername());
+            newUser.setPassword(dto.getPassword());
+            newUser.addRole(dto.getRole());
+
+            return userDao.create(newUser);
         }
         catch (Exception e)
         {
@@ -67,7 +80,7 @@ public class UserController
             if (!passwordMatches)
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password.");
 
-            // Return a dummy token for now
+            // Return a fake token for now
             Map<String, String> result = new HashMap<>();
             result.put("token", "fake-jwt-token");
             return result;
